@@ -143,13 +143,13 @@ static const struct net_device_ops netdev_ops = {
         .ndo_set_rx_mode        = netdev_no_ret,
         .ndo_validate_addr      = netdev_open,
         .ndo_set_mac_address    = NULL,
-        .ndo_change_mtu         = NULL,
+        .ndo_change_mtu_rh74         = NULL,
         .ndo_tx_timeout         = netdev_no_ret,
         .ndo_vlan_rx_add_vid    = NULL,
         .ndo_vlan_rx_kill_vid   = NULL,
         .ndo_do_ioctl           = NULL,
         .ndo_set_vf_mac         = NULL,
-        .ndo_set_vf_vlan        = NULL,
+        .ndo_set_vf_vlan_rh73        = NULL,
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 15, 0)
         .ndo_set_vf_tx_rate     = NULL,
 #else
@@ -158,7 +158,7 @@ static const struct net_device_ops netdev_ops = {
         .ndo_set_vf_spoofchk    = NULL,
         .ndo_get_vf_config      = NULL,
         .ndo_get_stats          = netdev_stats,
-        .ndo_setup_tc           = NULL,
+        .ndo_setup_tc_rh74           = NULL,
 #ifdef CONFIG_NET_POLL_CONTROLLER
         .ndo_poll_controller    = netdev_no_ret,
 	.ndo_netpoll_setup	= NULL,
