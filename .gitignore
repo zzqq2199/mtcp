@@ -2,7 +2,7 @@
 *.d
 
 # Object files
-*.o
+#*.o
 *.ko
 *.obj
 *.elf
@@ -54,16 +54,14 @@ dkms.conf
 log_*
 *~
 *.cache
-Makefile
-apps/example/Makefile
-apps/example/epserver
-apps/example/epwget
-config.h
-config.log
-config.status
-dpdk-iface-kmod/dpdk_iface_main
-dpdk/x86_64-native-linuxapp-gcc
-io_engine/lib/Makefile
-mtcp/src/Makefile
-stamp-h1
-util/Makefile
+/apps/example/Makefile
+/apps/example/epserver
+/apps/example/epwget
+/config.h
+/config.log
+/config.status
+/dpdk-iface-kmod/dpdk_iface_main
+/io_engine/lib/Makefile
+/mtcp/src/Makefile
+/stamp-h1
+/util/Makefile
