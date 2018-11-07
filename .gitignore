@@ -65,3 +65,5 @@ log_*
 /mtcp/src/Makefile
 /stamp-h1
 /util/Makefile
+
+/.vs
