@@ -182,11 +182,13 @@ CreateConnection(thread_context_t ctx)
 		return -1;
 	}
 	memset(&ctx->wvars[sockid], 0, sizeof(struct wget_vars));
+    /*
 	ret = mtcp_setsock_nonblock(mctx, sockid);
 	if (ret < 0) {
 		TRACE_ERROR("Failed to set socket in nonblocking mode.\n");
 		exit(-1);
 	}
+    */
 
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = daddr;
@@ -327,19 +329,23 @@ HandleReadEvent(thread_context_t ctx, int sockid, struct wget_vars *wv)
 	int rd, copy_len;
 
 	rd = 1;
+    int toRecv=0;
+    int haveRecved=0;
 	while (rd > 0) {
 		rd = mtcp_read(mctx, sockid, buf, BUF_SIZE);
 		if (rd <= 0)
 			break;
-		ctx->stat.reads += rd;
+		//ctx->stat.reads += rd;
 
+        /*
 		TRACE_APP("Socket %d: mtcp_read ret: %d, total_recv: %lu, "
 				"header_set: %d, header_len: %u, file_len: %lu\n", 
 				sockid, rd, wv->recv + rd, 
 				wv->headerset, wv->header_len, wv->file_len);
 
-		pbuf = buf;
+        */
 		if (!wv->headerset) {
+            pbuf = buf;
 			copy_len = MIN(rd, HTTP_HEADER_LEN - wv->resp_len);
 			memcpy(wv->response + wv->resp_len, buf, copy_len);
 			wv->resp_len += copy_len;
@@ -365,6 +371,9 @@ HandleReadEvent(thread_context_t ctx, int sockid, struct wget_vars *wv)
 				
 				pbuf += (rd - (wv->resp_len - wv->header_len));
 				rd = (wv->resp_len - wv->header_len);
+
+                toRecv = wv->header_len + wv->file_len;
+
 				//printf("Successfully parse header.\n");
 				//fflush(stdout);
 
@@ -386,7 +395,8 @@ HandleReadEvent(thread_context_t ctx, int sockid, struct wget_vars *wv)
 			//wv->recv += wv->header_len;
 			//rd -= wv->header_len;
 		}
-		wv->recv += rd;
+        haveRecved += rd;
+        /*
 		
 		if (fio && wv->fd > 0) {
 			int wr = 0;
@@ -403,24 +413,33 @@ HandleReadEvent(thread_context_t ctx, int sockid, struct wget_vars *wv)
 				 wv->write += _wr;
 			}
 		}
+        */
 		
+        if (haveRecved >= toRecv){
+            break;
+        }
+
+        /*
 		if (wv->header_len && (wv->recv >= wv->header_len + wv->file_len)) {
 			break;
 		}
+        */
 	}
 
 	if (rd > 0) {
+        printf("HandleReadEvent:\ttoRecv=%d\t haveRecved=%d\n",toRecv,haveRecved);
+        DownloadComplete(ctx, sockid, wv);
+        return 0;
 		if (wv->header_len && (wv->recv >= wv->header_len + wv->file_len)) {
 			TRACE_APP("Socket %d Done Write: "
 					"header: %u file: %lu recv: %lu write: %lu\n", 
 					sockid, wv->header_len, wv->file_len, 
 					wv->recv - wv->header_len, wv->write);
-			DownloadComplete(ctx, sockid, wv);
 
-			return 0;
 		}
 
 	} else if (rd == 0) {
+        printf("HandleReadEvent:\ttoRecv=%d\t haveRecved=%d\n",toRecv,haveRecved);
 		/* connection closed by remote host */
 		TRACE_DBG("Socket %d connection closed with server.\n", sockid);
 
@@ -433,6 +452,8 @@ HandleReadEvent(thread_context_t ctx, int sockid, struct wget_vars *wv)
 		}
 
 	} else if (rd < 0) {
+        printf("HandleReadEvent:\ttoRecv=%d\t haveRecved=%d\n",toRecv,haveRecved);
+        assert(0);
 		if (errno != EAGAIN) {
 			TRACE_DBG("Socket %d: mtcp_read() error %s\n", 
 					sockid, strerror(errno));
